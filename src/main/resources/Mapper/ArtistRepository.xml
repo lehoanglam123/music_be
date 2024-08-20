@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.security.repository.ArtistRepository">
+
+    <select id="getAll" resultType="com.spring.security.model.Artist" resultMap="result">
+        SELECT
+            `artist_id`,
+            `artist_name`,
+            LEFT(`biography`, 256),
+            LEFT(`image_url`, 256)
+        FROM `music`.`artist`
+        WHERE 1=1;
+    </select>
+
+    <select id="getArtistByName" resultType="com.spring.security.model.Artist" resultMap="result">
+        SELECT
+            `artist_id`,
+            `artist_name`,
+            LEFT(`biography`, 256),
+            LEFT(`image_url`, 256)
+        FROM `music`.`artist`
+        WHERE `artist_name` = #{artistName};
+    </select>
+
+    <insert id="insertArtist" >
+        INSERT INTO `music`.`artist`
+            (`artist_name`)
+        VALUES
+            (#{artistName});
+    </insert>
+
+    <select id="getArtistById" resultType="com.spring.security.model.Artist" resultMap="result">
+        SELECT
+            `artist_id`,
+            `artist_name`,
+            LEFT(`biography`, 256),
+            LEFT(`image_url`, 256)
+        FROM `music`.`artist`
+        WHERE `artist_id` = #{id};
+    </select>
+
+    <update id="updateArtistById">
+        UPDATE `music`.`artist`
+        SET
+            `artist_name`= #{artistName}
+        WHERE
+            `artist_id`=#{id};
+    </update>
+
+    <select id="getArtistByListId" resultType="int" parameterType="com.spring.security.request.ListArtistId">
+        SELECT
+            `artist_id`
+        FROM
+            `music`.`artist`
+        WHERE
+            `artist_id` IN
+            <if test="listArtistId != null and listArtistId.size() > 0">
+                <foreach collection="listArtistId" item="listId" open="(" close=")" separator=",">
+                    ${listId}
+                </foreach>
+            </if>
+    </select>
+
+    <delete id="deleteArtistByListId">
+        DELETE FROM `music`.`artist`
+        WHERE `artist_id`
+        IN
+        <if test="listArtistId != null and listArtistId.size() > 0">
+            <foreach collection="listArtistId" item="listId" open="(" close=")" separator=",">
+                ${listId}
+            </foreach>
+        </if>
+    </delete>
+
+    <resultMap id="result" type="Artist">
+        <result property="id" column="artist_id"/>
+        <result property="artistName" column="artist_name"/>
+        <result property="biography" column="biography"/>
+        <result property="imageUrl" column="image_url"/>
+    </resultMap>
+</mapper>

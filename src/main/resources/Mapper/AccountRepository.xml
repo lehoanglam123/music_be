@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.security.repository.AccountRepository">
+    <select id="getAll">
+        SELECT
+            `account_id`,
+            `username`,
+            `password`,
+            `gmail`,
+            LEFT(`favorite`, 256),
+            `role`
+        FROM
+            `music`.`account`
+        WHERE
+            1=1;
+    </select>
+
+    <select id="getAccountByUsername" resultMap="result" resultType="com.spring.security.model.Account">
+        SELECT
+            `account_id`,
+            `username`,
+            `password`,
+            `gmail`,
+            `favorite`,
+            `role`
+        FROM
+            `music`.`account`
+        WHERE
+            `username`= #{username};
+    </select>
+
+    <select id="getAccountByGmail" resultMap="result" resultType="com.spring.security.model.Account">
+        SELECT
+            `account_id`,
+            `username`,
+            `password`,
+            `gmail`,
+            `favorite`,
+            `role`
+        FROM
+            `music`.`account`
+        WHERE
+            `gmail`= #{gmail};
+    </select>
+
+    <insert id="insertAccount" parameterType="com.spring.security.model.Account"
+            keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO `music`.`account` (
+            `username`,
+            `password`,
+            `gmail`,
+            `role`)
+        VALUES (
+            #{username},
+            #{password},
+            #{gmail},
+            #{role});
+    </insert>
+
+    <resultMap id="result" type="Account">
+        <result property="id" column="account_id" />
+        <result property="username" column="username" />
+        <result property="password" column="password" />
+        <result property="gmail" column="gmail" />
+        <result property="favorite" column="favorite" />
+        <result property="role" column="role" />
+    </resultMap>
+
+</mapper>

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.security.repository.AlbumRepository">
+    <select id="getAll" resultType="com.spring.security.model.Album"
+            resultMap="result">
+        SELECT
+            `album_id`,
+            `artist_id`,
+            `album_name`,
+            `release_year`,
+            `image_url`
+        FROM
+            `music`.`album`
+        WHERE
+        1=1;
+    </select>
+
+    <!--CREATE ALBUM-->
+    <select id="getAlbumByArtistIdAndName" resultType="com.spring.security.model.Album" resultMap="result">
+        SELECT
+            `album_id`,
+            `album_name`,
+            `artist_id`,
+            `release_year`,
+            `image_url`
+        FROM
+            `music`.`album`
+        WHERE
+            `artist_id` = #{artistId}
+        AND
+            `album_name` = #{albumName}
+    </select>
+
+    <select id="getAlbumByName" resultType="com.spring.security.model.Album"
+            resultMap="result">
+        SELECT
+            `album_id`,
+            `album_name`,
+            `artist_id`,
+            `release_year`,
+            `image_url`
+        FROM
+            `music`.`album`
+        WHERE
+            `album_name` = #{albumName}
+    </select>
+
+    <insert id="insertAlbum">
+        INSERT INTO `music`.`album`
+            (`artist_id`,
+            `album_name`)
+        VALUES
+            (#{artistId},
+            #{albumName});
+    </insert>
+
+    <!--UPDATE ALBUM-->
+
+    <select id="getAlbumById" resultType="com.spring.security.model.Album"
+            resultMap="result">
+        SELECT
+            `album_id`,
+            `artist_id`,
+            `album_name`,
+            `release_year`,
+            `image_url`
+        FROM
+            `music`.`album`
+        WHERE
+            `album_id` = #{id}
+    </select>
+
+    <update id="updateAlbum">
+        UPDATE `music`.`album`
+        SET
+            `album_name`=#{albumName},
+            `image_url`=#{imageUrl}
+        WHERE
+            `album_id`=#{id};
+    </update>
+
+    <!--DELETE ALBUM-->
+    <select id="getAlbumByListId" resultType="com.spring.security.model.Album"
+            resultMap="result">
+        SELECT
+            `album_id`,
+            `artist_id`,
+            `album_name`,
+            `release_year`,
+            `image_url`
+        FROM
+            `music`.`album`
+        WHERE
+            `album_id`
+        IN
+        <foreach collection="listAlbumId" item="listId" open="("
+                 close=")" separator=",">
+            ${listId}
+        </foreach>
+    </select>
+
+    <delete id="deleteListAlbum">
+        DELETE FROM `music`.`album`
+        WHERE `album_id`
+        IN
+        <foreach collection="listAlbumId" item="listId" open="("
+                 close=")" separator=",">
+            ${listId}
+        </foreach>
+    </delete>
+
+    <resultMap id="result" type="Album">
+        <result property="id" column="album_id"/>
+        <result property="artistId" column="artist_id"/>
+        <result property="albumName" column="album_name"/>
+        <result property="releaseYear" column="release_year"/>
+        <result property="imageUrl" column="image_url"/>
+    </resultMap>
+</mapper>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.security.repository.GenreRepository">
+    <select id="getAll" resultType="com.spring.security.model.Genre"
+            resultMap="result">
+        SELECT
+            `genre_id`,
+            `genre_name`,
+            `status`
+        FROM
+            `music`.`genre`
+        WHERE
+            `status`= 1;
+    </select>
+
+    <select id="getGenreByName" resultType="com.spring.security.model.Genre"
+            resultMap="result">
+        SELECT
+            `genre_id`,
+            `genre_name`,
+            `status`
+        FROM
+            `music`.`genre`
+        WHERE
+            `genre_name`= #{genreName};
+    </select>
+
+    <update id="updateGenreStatusById">
+        UPDATE `music`.`genre`
+        SET
+            `status`=1
+        WHERE
+            `genre_id`=#{id};
+    </update>
+
+    <insert id="insertGenre">
+        INSERT INTO `music`.`genre`
+            (`genre_name`)
+        VALUES
+            (#{genreName});
+    </insert>
+
+    <update id="updateGenreNameById">
+        UPDATE `music`.`genre`
+        SET
+            `genre_name`= #{genreName}
+        WHERE
+            `genre_id`=#{id};
+    </update>
+
+    <select id="getListGenreByListId" resultType="int" parameterType="com.spring.security.request.ListGenreId">
+        SELECT
+        `genre_id`
+        FROM
+        `music`.`genre`
+        WHERE
+        `genre_id` IN
+        <if test="listGenreId != null and listGenreId.size() > 0">
+            <foreach collection="listGenreId" item="listId" open="(" close=")" separator=",">
+                ${listId}
+            </foreach>
+        </if>
+    </select>
+
+    <delete id="deleteGenreByListId">
+        DELETE FROM `music`.`genre`
+        WHERE `genre_id`
+        IN
+        <if test="listGenreId != null and listGenreId.size() > 0">
+            <foreach collection="listGenreId" item="listId" open="("
+                     close=")" separator=",">
+                ${listId}
+            </foreach>
+        </if>
+    </delete>
+
+    <resultMap id="result" type="Genre">
+        <result property="id" column="genre_id"/>
+        <result property="genreName" column="genre_name"/>
+        <result property="status" column="genre_status"/>
+    </resultMap>
+</mapper>

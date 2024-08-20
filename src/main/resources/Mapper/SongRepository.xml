@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.security.repository.SongRepository">
+    <select id="getAll" resultMap="search" resultType="com.spring.security.entity.SongSearchEntity">
+        SELECT
+            `song_id`,
+            `song_name`,
+            `genre_id`,
+            `artist_id`,
+            `album_id`,
+            `release_year`,
+            `audio`,
+            `duration`,
+            `account_id`
+        FROM `music`.`song`
+        WHERE 1=1;
+    </select>
+
+    <insert id="insertSong" parameterType="com.spring.security.entity.SongEntity">
+        INSERT INTO `music`.`song`
+            (`song_name`,
+            `genre_id`,
+            `artist_id`,
+            `album_id`,
+            `release_year`,
+            `audio`,
+            `duration`)
+        VALUES
+            (#{songName},
+            #{genreId},
+            #{artistId},
+            #{albumId},
+            DATE(NOW()),
+            #{audio},
+            #{duration});
+    </insert>
+
+    <!-- GET SONG BY ID -->
+    <select id="getListSongByUserId" resultType="com.spring.security.entity.SongSearchEntity"
+            resultMap="search">
+        SELECT
+            s.`song_id`,
+            s.`song_name`,
+            s.`album_id`,
+            s.`artist_id`,
+            g.`genre_name`,
+            s.`release_year`,
+            s.`audio`,
+            s.`duration`
+        FROM
+            `music`.`song` s
+        LEFT JOIN
+            `music`.`genre` g ON s.`genre_id` = g.`genre_id`
+        LEFT JOIN
+            `music`.`account` u ON s.`account_id` = u.`account_id`
+        WHERE
+            s.`account_id`=#{id};
+    </select>
+
+    <!-- SEARCH SONG BY NAME -->
+    <select id="searchSongByName" resultType="com.spring.security.entity.SongSearchEntity"
+            resultMap="search">
+        SELECT
+            s.song_id,
+            s.song_name,
+            s.release_year,
+            s.duration,
+            s.status,
+            s.audio,
+            a.artist_name,
+            g.genre_name
+        FROM
+            song s
+        LEFT JOIN
+            artist a ON s.artist_id = a.artist_id
+        LEFT JOIN
+            genre g ON s.genre_id = g.genre_id
+        WHERE
+            s.`song_name` LIKE CONCAT('%', #{songName, jdbcType=VARCHAR}, '%') ESCAPE '!'
+            OR a.artist_name LIKE CONCAT('%', #{songName, jdbcType=VARCHAR}, '%') ESCAPE '!'
+            LIMIT 5;
+    </select>
+    <!--********************-->
+
+    <!--************** -->
+
+    <!--UPDATE SONG-->
+    <select id="getSongById" resultType="com.spring.security.model.Song"
+            resultMap="result">
+        SELECT
+            `song_id`,
+            `song_name`,
+            `artist_id`,
+            `album_id`,
+            `genre_id`,
+            `release_year`,
+            LEFT(`audio`, 256),
+            `duration`,
+            `account_id`
+        FROM
+            `music`.`song`
+        WHERE
+            `song_id` = #{id};
+    </select>
+
+    <select id="getSongByName" resultType="com.spring.security.model.Song"
+            resultMap="result">
+        SELECT
+            `song_id`,
+            `song_name`,
+            `genre_id`,
+            `artist_id`,
+            `album_id`,
+            `release_year`,
+            LEFT(`audio`, 256),
+            `duration`,
+            `status`,
+            `account_id`
+        FROM
+            `music`.`song`
+        WHERE
+            `song_id` = #{songName};
+    </select>
+
+    <update id="updateSongById" parameterType="com.spring.security.model.Song">
+        UPDATE
+        `music`.`song`
+        SET
+        `song_name`=#{songName},
+        `genre_id`=#{genreId},
+        `artist_id`=#{artistId}
+        WHERE
+        `song_id`=#{id};
+    </update>
+    <!--***********-->
+
+    <!--DELETE SONG-->
+    <select id="getListSongByList" resultType="int" parameterType="com.spring.security.request.ListSongId">
+        SELECT
+            `song_id`
+        FROM
+            `music`.`song`
+        WHERE
+            `song_id` IN
+        <if test="listSongId != null and listSongId.size() > 0">
+            <foreach collection="listSongId" item="listId" open="("
+                     close=")" separator=",">
+                ${listId}
+            </foreach>
+        </if>
+    </select>
+
+    <delete id="deleteSongByListId">
+        DELETE FROM `music`.`song`
+        WHERE `song_id`
+        IN
+        <if test="listSongId != null and listSongId.size() > 0">
+            <foreach collection="listSongId" item="listId" open="("
+                     close=")" separator=",">
+                ${listId}
+            </foreach>
+        </if>
+    </delete>
+    <!--***********-->
+
+    <resultMap id="result" type="Song">
+        <result property="id" column="song_id"/>
+        <result property="songName" column="song_name"/>
+        <result property="genreId" column="genre_id"/>
+        <result property="artistId" column="artist_id"/>
+        <result property="albumId" column="album_id"/>
+        <result property="releaseYear" column="release_year"/>
+        <result property="audio" column="audio"/>
+        <result property="duration" column="duration"/>
+        <result property="status" column="status"/>
+        <result property="accountId" column="account_id"/>
+    </resultMap>
+
+    <resultMap id="search" type="SongSearchEntity">
+        <result property="id" column="song_id"/>
+        <result property="songName" column="song_name"/>
+        <result property="artistName" column="artist_name"/>
+        <result property="albumId" column="album_id"/>
+        <result property="genreName" column="genre_name"/>
+        <result property="releaseYear" column="release_year"/>
+        <result property="audio" column="audio"/>
+        <result property="duration" column="duration"/>
+        <result property="accountId" column="account_id" />
+    </resultMap>
+
+</mapper>

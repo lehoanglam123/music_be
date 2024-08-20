@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.security.repository.TokenRepository">
+    <select id="getAll">
+        SELECT
+            *
+        FROM
+            `music`.`token`
+        LIMIT 1000;
+    </select>
+
+    <insert id="insertToken">
+        INSERT INTO `music`.`token` (
+            `token`,
+            `revoked`,
+            `expired`,
+            `account_id`)
+        VALUES (
+            #{token},
+            #{revoked},
+            #{expired},
+            #{accountId});
+    </insert>
+
+    <update id="updateAllToken" >
+        UPDATE `music`.`token`
+        SET
+            `revoked` = TRUE ,
+            `expired`= TRUE
+        WHERE
+            `account_id` = #{id};
+    </update>
+    <select id="getListTokenIdByAccount" resultMap="getByAccountId">
+        SELECT
+            `token_id`
+        FROM
+            `music`.`token`
+        WHERE
+            `account_id` = #{id};
+    </select>
+    <select id="getTokenByToken" resultMap="result">
+        SELECT
+            `token_id`,
+            `token`,
+            `token_type`,
+            `revoked`,
+            `expired`,
+            `account_id`
+        FROM
+            `music`.`token`
+        WHERE
+            `token` = #{token};
+    </select>
+
+    <resultMap id="result" type="Token">
+        <result property="id" column="token_id"/>
+        <result property="token" column="token"/>
+        <result property="tokenType" column="token_type"/>
+        <result property="revoked" column="revoked" />
+        <result property="expired" column="expired" />
+        <result property="accountId" column="account_id" />
+    </resultMap>
+    <resultMap id="getByAccountId" type="Token">
+        <result property="id" column="token_id"/>
+    </resultMap>
+</mapper>
