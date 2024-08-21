@@ -15,10 +15,10 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException ex) {
         String errorMessage = ex.getConstraintViolations().iterator().next().getMessage();
-        ErrorResponse repsonse = ErrorResponse.builder()
+        ErrorResponse response = ErrorResponse.builder()
                 .status("400")
                 .message(errorMessage)
                 .build();
-        return new ResponseEntity<>(repsonse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 }

@@ -16,9 +16,8 @@ import org.springframework.web.bind.annotation.*;
 @ResponseBody
 @CrossOrigin(origins = "http://localhost:3000")
 public class AlbumController {
-
     @Autowired
-    private ServiceAlbum serviceAlbum;
+    ServiceAlbum serviceAlbum;
 
     @GetMapping("/getAll")
     public ResponseEntity<ListAlbumResponse> getAll(){

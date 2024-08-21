@@ -1,5 +1,6 @@
 package com.spring.security.service;
 
+import com.spring.security.controller.AlbumController;
 import com.spring.security.entity.AlbumEntity;
 import com.spring.security.request.ListAlbumId;
 import com.spring.security.response.album.CreateAlbumResponse;
@@ -14,7 +15,6 @@ public interface ServiceAlbum {
     ResponseEntity<ListAlbumResponse> getAll();
 
     ResponseEntity<CreateAlbumResponse> createAlbum(int artistId, AlbumEntity entity);
-
 
     ResponseEntity<UpdateAlbumResponse> updateAlbum(int id, AlbumEntity entity);
 

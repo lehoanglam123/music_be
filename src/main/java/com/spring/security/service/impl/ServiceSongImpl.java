@@ -34,6 +34,7 @@ public class ServiceSongImpl implements ServiceSong {
 
     @Autowired
     private Cloudinary cloudinary;
+
     @Value("${folder.specified.name}")
     private String uploadUrl;
 
@@ -45,14 +46,14 @@ public class ServiceSongImpl implements ServiceSong {
                     .status("204")
                     .message("Data not available!")
                     .build();
-            return new ResponseEntity<ListSongResponse>(response, HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
         }
         ListSongResponse response = ListSongResponse.builder()
                 .status("200")
                 .message("Successfully retrieved data!")
                 .data(listSong)
                 .build();
-        return new ResponseEntity<ListSongResponse>(response, HttpStatus.OK);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 
@@ -80,7 +81,7 @@ public class ServiceSongImpl implements ServiceSong {
                         .message("Creating successful song!")
                         .songUrl(url)
                         .build();
-                return new ResponseEntity<CreateSongResponse>(response, HttpStatus.OK);
+                return new ResponseEntity<>(response, HttpStatus.OK);
             }
             Map<?, ?> cloudinaryResponse = this.cloudinary.uploader()
                     .upload(multipartFile.getBytes(),uploadConfig);
@@ -93,13 +94,13 @@ public class ServiceSongImpl implements ServiceSong {
                     .message("Creating successful song!")
                     .songUrl(url)
                     .build();
-            return new ResponseEntity<CreateSongResponse>(response, HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         CreateSongResponse response = CreateSongResponse.builder()
                 .status("400")
                 .message("Directory not found")
                 .build();
-        return new ResponseEntity<CreateSongResponse>(response, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
 
     }
 
@@ -117,23 +118,23 @@ public class ServiceSongImpl implements ServiceSong {
                         .status("200")
                         .message("Update successfully!")
                         .build();
-                return new ResponseEntity<UpdateSongResponse>(response, HttpStatus.OK);
+                return new ResponseEntity<>(response, HttpStatus.OK);
             }
             UpdateSongResponse response = UpdateSongResponse.builder()
                     .status("400")
-                    .message("The song name already exsists!")
+                    .message("The song name already exist!")
                     .build();
-            return new ResponseEntity<UpdateSongResponse>(response, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         UpdateSongResponse response = UpdateSongResponse.builder()
                 .status("400")
                 .message("The song does not exist!")
                 .build();
-        return new ResponseEntity<UpdateSongResponse>(response, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @Override
-    public ResponseEntity<DeleteSongResponse> deleteSong(ListSongId listId) throws Exception{
+    public ResponseEntity<DeleteSongResponse> deleteSong(ListSongId listId) {
         List<Integer> listSongByListId = songRepository.getListSongByList(listId);
         if(listId.getListSongId().size()==listSongByListId.size()) {
             songRepository.deleteSongByListId(listId);
@@ -141,13 +142,13 @@ public class ServiceSongImpl implements ServiceSong {
                     .status("200")
                     .message("Successfully deleted the song!")
                     .build();
-            return new ResponseEntity<DeleteSongResponse>(response, HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         DeleteSongResponse response = DeleteSongResponse.builder()
                 .status("400")
                 .message("Failed to delete the song!")
                 .build();
-        return new ResponseEntity<DeleteSongResponse>(response, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @Override
@@ -185,7 +186,7 @@ public class ServiceSongImpl implements ServiceSong {
                 .message("Get Data successfully!")
                 .data(listSong)
                 .build();
-        return new ResponseEntity<ListSongResponse>(response, HttpStatus.OK);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     private static File convertMultiToFile(MultipartFile multipartFile) throws IOException {
