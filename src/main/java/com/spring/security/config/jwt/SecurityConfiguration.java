@@ -31,7 +31,8 @@ public class SecurityConfiguration {
     private static final String[] LIST_WHITE_URL = {
             "/api/auth/**",
             "/api/admin/song/getAll",
-            "api/admin/song/search/**"
+            "api/admin/song/search/**",
+            "api/admin/song/create"
     };
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

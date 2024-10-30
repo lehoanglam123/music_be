@@ -14,6 +14,13 @@ import com.spring.security.service.ServiceSong;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.AudioHeader;
+import org.jaudiotagger.audio.exceptions.CannotReadException;
+import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
+import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
+import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.Tag;
+import org.jaudiotagger.tag.TagException;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -63,13 +70,15 @@ public class ServiceSongImpl implements ServiceSong {
         if (!multipartFile.isEmpty()) {
             //upload file with name song is null
             String duration = getDuration(multipartFile);
+            String lyrics = getLyrics(multipartFile);
             String fileName = multipartFile.getOriginalFilename();
-            String publicId = uploadUrl.concat(fileName.substring(0, fileName.indexOf(".")));
+            var publicId = uploadUrl.concat(fileName.substring(0, fileName.indexOf(".")));
             Map<String, Object> uploadConfig = new HashMap<>();
             uploadConfig.put("resource_type", "auto");
             uploadConfig.put("public_id", publicId);
             uploadConfig.put("eager_async", true);
             entity.setDuration(duration);
+            entity.setLyrics(lyrics);
             if (entity.getSongName() != null) {
                 Map<?, ?> cloudinaryResponse = this.cloudinary.uploader()
                         .upload(multipartFile.getBytes(),uploadConfig);
@@ -189,9 +198,10 @@ public class ServiceSongImpl implements ServiceSong {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+
     private static File convertMultiToFile(MultipartFile multipartFile) throws IOException {
         try {
-            File convFile = new File(multipartFile.getOriginalFilename());
+            File convFile = new File(Objects.requireNonNull(multipartFile.getOriginalFilename()));
             convFile.createNewFile();
             FileOutputStream fos = new FileOutputStream(convFile);
             fos.write(multipartFile.getBytes());
@@ -201,6 +211,29 @@ public class ServiceSongImpl implements ServiceSong {
             System.err.print(e);
             return null;
         }
+    }
+
+    private static String getLyrics(MultipartFile multipartFile) {
+         try{
+             File file = convertMultiToFile(multipartFile);
+             AudioFile audioFile = AudioFileIO.read(file);
+             Tag tag = audioFile.getTag();
+             file.delete();
+             String lyrics = tag.getFirst(FieldKey.LYRICS);
+             System.out.println(lyrics);
+             return lyrics;
+         }catch (IOException exception) {
+             exception.printStackTrace();
+             return null;
+         } catch (CannotReadException e) {
+             throw new RuntimeException(e);
+         } catch (TagException e) {
+             throw new RuntimeException(e);
+         } catch (InvalidAudioFrameException e) {
+             throw new RuntimeException(e);
+         } catch (ReadOnlyFileException e) {
+             throw new RuntimeException(e);
+         }
     }
 
     private static String getDuration(MultipartFile multipartFile) {

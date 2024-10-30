@@ -1,6 +1,5 @@
 package com.spring.security.service.impl;
 
-import com.spring.security.controller.AlbumController;
 import com.spring.security.entity.AlbumEntity;
 import com.spring.security.model.Album;
 import com.spring.security.repository.AlbumRepository;

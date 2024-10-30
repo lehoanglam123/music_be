@@ -18,6 +18,7 @@ public class SongEntity {
     private Integer genreId;
     private Date releaseYear;
     private String audio;
+    private String lyrics;
     private String duration;
 
     public SongEntity() {

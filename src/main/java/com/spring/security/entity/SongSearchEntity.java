@@ -17,6 +17,7 @@ public class SongSearchEntity {
     private Integer albumId;
     private Date releaseYear;
     private String audio;
+    private String lyrics;
     private String duration;
     private Integer accountId;
 
