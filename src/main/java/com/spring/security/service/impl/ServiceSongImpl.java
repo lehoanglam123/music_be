@@ -11,6 +11,13 @@ import com.spring.security.response.song.DeleteSongResponse;
 import com.spring.security.response.song.ListSongResponse;
 import com.spring.security.response.song.UpdateSongResponse;
 import com.spring.security.service.ServiceSong;
+import net.bramp.ffmpeg.FFmpeg;
+import net.bramp.ffmpeg.FFmpegExecutor;
+import net.bramp.ffmpeg.FFprobe;
+import net.bramp.ffmpeg.builder.FFmpegBuilder;
+import net.bramp.ffmpeg.probe.FFmpegFormat;
+import net.bramp.ffmpeg.probe.FFmpegProbeResult;
+import net.bramp.ffmpeg.probe.FFmpegStream;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.AudioHeader;
@@ -46,7 +53,8 @@ public class ServiceSongImpl implements ServiceSong {
     private String uploadUrl;
 
     @Override
-    public ResponseEntity<ListSongResponse> getAll() {
+    public ResponseEntity<ListSongResponse> getAll() throws IOException {
+        processAudioFile();
         List<SongSearchEntity> listSong = songRepository.getAll();
         if (listSong.isEmpty()) {
             ListSongResponse response = ListSongResponse.builder()
@@ -69,7 +77,7 @@ public class ServiceSongImpl implements ServiceSong {
     public ResponseEntity<CreateSongResponse> insertSong(MultipartFile multipartFile, SongEntity entity) throws Exception {
         if (!multipartFile.isEmpty()) {
             //upload file with name song is null
-            String duration = getDuration(multipartFile);
+            int duration = getDuration(multipartFile);
             String lyrics = getLyrics(multipartFile);
             String fileName = multipartFile.getOriginalFilename();
             var publicId = uploadUrl.concat(fileName.substring(0, fileName.indexOf(".")));
@@ -225,31 +233,27 @@ public class ServiceSongImpl implements ServiceSong {
          }catch (IOException exception) {
              exception.printStackTrace();
              return null;
-         } catch (CannotReadException e) {
-             throw new RuntimeException(e);
-         } catch (TagException e) {
-             throw new RuntimeException(e);
-         } catch (InvalidAudioFrameException e) {
-             throw new RuntimeException(e);
-         } catch (ReadOnlyFileException e) {
+         } catch (CannotReadException | TagException | InvalidAudioFrameException | ReadOnlyFileException e) {
              throw new RuntimeException(e);
          }
     }
 
-    private static String getDuration(MultipartFile multipartFile) {
+    private static int getDuration(MultipartFile multipartFile) {
         try {
             File file = convertMultiToFile(multipartFile);
             AudioFile audioFile = AudioFileIO.read(file);
             AudioHeader audioHeader = audioFile.getAudioHeader();
-            String duration = (audioHeader.getTrackLength()/60)+":"+(audioHeader.getTrackLength()%60);
+            int duration = audioHeader.getTrackLength();
             file.delete();
             return duration;
         } catch (IOException e) {
             e.printStackTrace();
-            return null;
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
         }
+        return 0;
+    }
+    public static void processAudioFile() throws IOException {
+            
     }
 }

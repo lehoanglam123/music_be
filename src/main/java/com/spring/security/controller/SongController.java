@@ -15,6 +15,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/api/admin/song")
 @ResponseBody
@@ -25,7 +27,7 @@ public class SongController {
     private ServiceSong serviceSong;
 
     @GetMapping("/getAll")
-    public ResponseEntity<ListSongResponse> getAll(){
+    public ResponseEntity<ListSongResponse> getAll() throws IOException {
         return serviceSong.getAll();
     }
 

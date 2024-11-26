@@ -10,9 +10,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 @Service
 public interface ServiceSong {
-    ResponseEntity<ListSongResponse> getAll();
+    ResponseEntity<ListSongResponse> getAll() throws IOException;
 
     ResponseEntity<CreateSongResponse> insertSong(MultipartFile file, SongEntity entity) throws Exception;
 

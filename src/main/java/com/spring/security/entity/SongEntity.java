@@ -10,7 +10,7 @@ import java.util.Date;
 @Data
 @Builder
 @AllArgsConstructor
-public class SongEntity {
+public class  SongEntity {
     private Integer id;
     private String songName;
     private Integer artistId;
@@ -19,7 +19,7 @@ public class SongEntity {
     private Date releaseYear;
     private String audio;
     private String lyrics;
-    private String duration;
+    private Integer duration;
 
     public SongEntity() {
 
