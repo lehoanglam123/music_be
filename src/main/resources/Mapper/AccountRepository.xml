@@ -10,7 +10,7 @@
             LEFT(`favorite`, 256),
             `role`
         FROM
-            `music`.`account`
+            `music`.`accounts`
         WHERE
             1=1;
     </select>
@@ -24,7 +24,7 @@
             `favorite`,
             `role`
         FROM
-            `music`.`account`
+            `music`.`accounts`
         WHERE
             `username`= #{username};
     </select>
@@ -38,14 +38,14 @@
             `favorite`,
             `role`
         FROM
-            `music`.`account`
+            `music`.`accounts`
         WHERE
             `gmail`= #{gmail};
     </select>
 
     <insert id="insertAccount" parameterType="com.spring.security.model.Account"
             keyProperty="id" useGeneratedKeys="true">
-        INSERT INTO `music`.`account` (
+        INSERT INTO `music`.`accounts` (
             `username`,
             `password`,
             `gmail`,

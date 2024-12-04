@@ -47,7 +47,7 @@ public class SongController {
     @PostMapping("/create")
     public ResponseEntity<CreateSongResponse> createSong(@RequestPart("file") MultipartFile file,
                                                          @RequestPart("data") SongEntity entity) throws Exception{
-        return serviceSong.insertSong(file, entity);
+        return serviceSong.uploadSong(file, entity);
     }
 
     @PutMapping("/update/{id}")

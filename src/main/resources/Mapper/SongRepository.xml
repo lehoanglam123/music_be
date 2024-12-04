@@ -18,7 +18,7 @@
     </select>
 
     <insert id="insertSong" parameterType="com.spring.security.entity.SongEntity">
-        INSERT INTO `music`.`song`
+        INSERT INTO `music`.`songs`
             (`song_name`,
             `genre_id`,
             `artist_id`,
@@ -52,11 +52,11 @@
             s.`lyrics`
             s.`duration`
         FROM
-            `music`.`song` s
+            `music`.`songs` s
         LEFT JOIN
-            `music`.`genre` g ON s.`genre_id` = g.`genre_id`
+            `music`.`genres` g ON s.`genre_id` = g.`genre_id`
         LEFT JOIN
-            `music`.`account` u ON s.`account_id` = u.`account_id`
+            `music`.`accounts` u ON s.`account_id` = u.`account_id`
         WHERE
             s.`account_id`=#{id};
     </select>
@@ -75,11 +75,11 @@
             a.artist_name,
             g.genre_name
         FROM
-            song s
+            songs s
         LEFT JOIN
-            artist a ON s.artist_id = a.artist_id
+            artists a ON s.artist_id = a.artist_id
         LEFT JOIN
-            genre g ON s.genre_id = g.genre_id
+            genres g ON s.genre_id = g.genre_id
         WHERE
             s.`song_name` LIKE CONCAT('%', #{songName, jdbcType=VARCHAR}, '%') ESCAPE '!'
             OR a.artist_name LIKE CONCAT('%', #{songName, jdbcType=VARCHAR}, '%') ESCAPE '!'
@@ -103,7 +103,7 @@
             `duration`,
             `account_id`
         FROM
-            `music`.`song`
+            `music`.`songs`
         WHERE
             `song_id` = #{id};
     </select>
@@ -123,14 +123,14 @@
             `status`,
             `account_id`
         FROM
-            `music`.`song`
+            `music`.`songs`
         WHERE
             `song_id` = #{songName};
     </select>
 
     <update id="updateSongById" parameterType="com.spring.security.model.Song">
         UPDATE
-            `music`.`song`
+            `music`.`songs`
         SET
             `song_name`=#{songName},
             `genre_id`=#{genreId},
@@ -145,7 +145,7 @@
         SELECT
             `song_id`
         FROM
-            `music`.`song`
+            `music`.`songs`
         WHERE
             `song_id` IN
         <if test="listSongId != null and listSongId.size() > 0">
@@ -157,7 +157,7 @@
     </select>
 
     <delete id="deleteSongByListId">
-        DELETE FROM `music`.`song`
+        DELETE FROM `music`.`songs`
         WHERE `song_id`
         IN
         <if test="listSongId != null and listSongId.size() > 0">

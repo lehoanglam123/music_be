@@ -10,7 +10,7 @@
             `release_year`,
             `image_url`
         FROM
-            `music`.`album`
+            `music`.`albums`
         WHERE
         1=1;
     </select>
@@ -24,7 +24,7 @@
             `release_year`,
             `image_url`
         FROM
-            `music`.`album`
+            `music`.`albums`
         WHERE
             `artist_id` = #{artistId}
         AND
@@ -40,13 +40,13 @@
             `release_year`,
             `image_url`
         FROM
-            `music`.`album`
+            `music`.`albums`
         WHERE
             `album_name` = #{albumName}
     </select>
 
     <insert id="insertAlbum">
-        INSERT INTO `music`.`album`
+        INSERT INTO `music`.`albums`
             (`artist_id`,
             `album_name`)
         VALUES
@@ -65,13 +65,13 @@
             `release_year`,
             `image_url`
         FROM
-            `music`.`album`
+            `music`.`albums`
         WHERE
             `album_id` = #{id}
     </select>
 
     <update id="updateAlbum">
-        UPDATE `music`.`album`
+        UPDATE `music`.`albums`
         SET
             `album_name`=#{albumName},
             `image_url`=#{imageUrl}
@@ -89,7 +89,7 @@
             `release_year`,
             `image_url`
         FROM
-            `music`.`album`
+            `music`.`albums`
         WHERE
             `album_id`
         IN
@@ -100,7 +100,7 @@
     </select>
 
     <delete id="deleteListAlbum">
-        DELETE FROM `music`.`album`
+        DELETE FROM `music`.`albums`
         WHERE `album_id`
         IN
         <foreach collection="listAlbumId" item="listId" open="("

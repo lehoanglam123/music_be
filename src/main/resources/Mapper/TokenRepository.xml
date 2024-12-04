@@ -5,12 +5,12 @@
         SELECT
             *
         FROM
-            `music`.`token`
+            `music`.`tokens`
         LIMIT 1000;
     </select>
 
     <insert id="insertToken">
-        INSERT INTO `music`.`token` (
+        INSERT INTO `music`.`tokens` (
             `token`,
             `revoked`,
             `expired`,
@@ -23,7 +23,7 @@
     </insert>
 
     <update id="updateAllToken" >
-        UPDATE `music`.`token`
+        UPDATE `music`.`tokens`
         SET
             `revoked` = TRUE ,
             `expired`= TRUE
@@ -34,7 +34,7 @@
         SELECT
             `token_id`
         FROM
-            `music`.`token`
+            `music`.`tokens`
         WHERE
             `account_id` = #{id};
     </select>
@@ -47,7 +47,7 @@
             `expired`,
             `account_id`
         FROM
-            `music`.`token`
+            `music`.`tokens`
         WHERE
             `token` = #{token};
     </select>

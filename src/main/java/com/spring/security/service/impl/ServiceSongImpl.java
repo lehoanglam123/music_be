@@ -35,11 +35,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
+import java.util.zip.ZipFile;
 
+@SuppressWarnings({"CallToPrintStackTrace", "ThrowablePrintedToSystemOut"})
 @Service
 public class ServiceSongImpl implements ServiceSong {
 
@@ -52,9 +52,11 @@ public class ServiceSongImpl implements ServiceSong {
     @Value("${folder.specified.name}")
     private String uploadUrl;
 
+    @Value("${upload.dir}")
+    private String uploadDir;
+
     @Override
     public ResponseEntity<ListSongResponse> getAll() throws IOException {
-        processAudioFile();
         List<SongSearchEntity> listSong = songRepository.getAll();
         if (listSong.isEmpty()) {
             ListSongResponse response = ListSongResponse.builder()
@@ -74,19 +76,17 @@ public class ServiceSongImpl implements ServiceSong {
 
 
     @Override
-    public ResponseEntity<CreateSongResponse> insertSong(MultipartFile multipartFile, SongEntity entity) throws Exception {
+    public ResponseEntity<CreateSongResponse> uploadSong(MultipartFile multipartFile, SongEntity entity) throws Exception {
         if (!multipartFile.isEmpty()) {
             //upload file with name song is null
-            int duration = getDuration(multipartFile);
-            String lyrics = getLyrics(multipartFile);
             String fileName = multipartFile.getOriginalFilename();
             var publicId = uploadUrl.concat(fileName.substring(0, fileName.indexOf(".")));
             Map<String, Object> uploadConfig = new HashMap<>();
             uploadConfig.put("resource_type", "auto");
             uploadConfig.put("public_id", publicId);
             uploadConfig.put("eager_async", true);
-            entity.setDuration(duration);
-            entity.setLyrics(lyrics);
+//            entity.setDuration(duration);
+//            entity.setLyrics(lyrics);
             if (entity.getSongName() != null) {
                 Map<?, ?> cloudinaryResponse = this.cloudinary.uploader()
                         .upload(multipartFile.getBytes(),uploadConfig);
@@ -207,10 +207,10 @@ public class ServiceSongImpl implements ServiceSong {
     }
 
 
-    private static File convertMultiToFile(MultipartFile multipartFile) throws IOException {
+    private File convertMultiToFile(MultipartFile multipartFile) throws IOException {
         try {
             File convFile = new File(Objects.requireNonNull(multipartFile.getOriginalFilename()));
-            convFile.createNewFile();
+            boolean newFile = convFile.createNewFile();
             FileOutputStream fos = new FileOutputStream(convFile);
             fos.write(multipartFile.getBytes());
             fos.close();
@@ -221,39 +221,42 @@ public class ServiceSongImpl implements ServiceSong {
         }
     }
 
-    private static String getLyrics(MultipartFile multipartFile) {
-         try{
-             File file = convertMultiToFile(multipartFile);
-             AudioFile audioFile = AudioFileIO.read(file);
-             Tag tag = audioFile.getTag();
-             file.delete();
-             String lyrics = tag.getFirst(FieldKey.LYRICS);
-             System.out.println(lyrics);
-             return lyrics;
-         }catch (IOException exception) {
-             exception.printStackTrace();
-             return null;
-         } catch (CannotReadException | TagException | InvalidAudioFrameException | ReadOnlyFileException e) {
-             throw new RuntimeException(e);
-         }
+    private boolean isZipFileByMagicNumber(MultipartFile multipartFile) throws IOException {
+        try(InputStream inputStream = multipartFile.getInputStream()){
+            byte[] signature = new byte[4];
+            if(inputStream.read(signature)!=4) {
+                return false;
+            }
+            return  signature[0] == 0x50 && signature[1] == 0x4B
+                    && signature[2] == 0x03 && signature[3] == 0x04;
+        }
     }
 
-    private static int getDuration(MultipartFile multipartFile) {
-        try {
-            File file = convertMultiToFile(multipartFile);
-            AudioFile audioFile = AudioFileIO.read(file);
-            AudioHeader audioHeader = audioFile.getAudioHeader();
-            int duration = audioHeader.getTrackLength();
-            file.delete();
-            return duration;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
+    private void unzipFile(MultipartFile zipFile) throws IOException {
+        File tempZipFile = new File(uploadDir, Objects.requireNonNull(zipFile.getOriginalFilename()));
+        zipFile.transferTo(tempZipFile);
+
+        try(ZipFile zip = new ZipFile(tempZipFile)){
+            zip.stream().forEach(entry -> {
+                try (InputStream zipInputStream = zip.getInputStream(entry)) {
+                    File outputFile = new File(uploadDir, entry.getName());
+                    if(entry.isDirectory()){
+                        boolean mkdir = outputFile.mkdirs();
+                    } else {
+                        try (BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(outputFile))) {
+                            byte[] buffer = new byte[1024];
+                            int length;
+                            while ((length = zipInputStream.read(buffer)) > 0) {
+                                outputStream.write(buffer, 0, length);
+                            }
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace(); // Handle exception appropriately
+                }
+            });
+        }catch (IOException e) {
+            e.printStackTrace(); // Handle exception appropriately
         }
-        return 0;
-    }
-    public static void processAudioFile() throws IOException {
-            
     }
 }

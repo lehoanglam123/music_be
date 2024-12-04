@@ -16,7 +16,6 @@ import java.io.IOException;
 public interface ServiceSong {
     ResponseEntity<ListSongResponse> getAll() throws IOException;
 
-    ResponseEntity<CreateSongResponse> insertSong(MultipartFile file, SongEntity entity) throws Exception;
 
     ResponseEntity<UpdateSongResponse> updateSong(int id, SongEntity entity) throws Exception;
 
@@ -25,4 +24,6 @@ public interface ServiceSong {
     ResponseEntity<ListSongResponse> searchSongByName(String songName);
 
     ResponseEntity<ListSongResponse> getListSongByUserId(int id);
+
+    ResponseEntity<CreateSongResponse> uploadSong(MultipartFile file, SongEntity entity) throws Exception;
 }

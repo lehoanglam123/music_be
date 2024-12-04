@@ -8,7 +8,7 @@
             `artist_name`,
             LEFT(`biography`, 256),
             LEFT(`image_url`, 256)
-        FROM `music`.`artist`
+        FROM `music`.`artists`
         WHERE 1=1;
     </select>
 
@@ -18,12 +18,12 @@
             `artist_name`,
             LEFT(`biography`, 256),
             LEFT(`image_url`, 256)
-        FROM `music`.`artist`
+        FROM `music`.`artists
         WHERE `artist_name` = #{artistName};
     </select>
 
     <insert id="insertArtist" >
-        INSERT INTO `music`.`artist`
+        INSERT INTO `music`.`artists`
             (`artist_name`)
         VALUES
             (#{artistName});
@@ -35,12 +35,12 @@
             `artist_name`,
             LEFT(`biography`, 256),
             LEFT(`image_url`, 256)
-        FROM `music`.`artist`
+        FROM `music`.`artists`
         WHERE `artist_id` = #{id};
     </select>
 
     <update id="updateArtistById">
-        UPDATE `music`.`artist`
+        UPDATE `music`.`artists`
         SET
             `artist_name`= #{artistName}
         WHERE
@@ -51,7 +51,7 @@
         SELECT
             `artist_id`
         FROM
-            `music`.`artist`
+            `music`.`artists`
         WHERE
             `artist_id` IN
             <if test="listArtistId != null and listArtistId.size() > 0">
@@ -62,7 +62,7 @@
     </select>
 
     <delete id="deleteArtistByListId">
-        DELETE FROM `music`.`artist`
+        DELETE FROM `music`.`artists`
         WHERE `artist_id`
         IN
         <if test="listArtistId != null and listArtistId.size() > 0">
