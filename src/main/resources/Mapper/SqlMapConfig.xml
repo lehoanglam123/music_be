@@ -5,6 +5,7 @@
 	<typeAliases>
 		<typeAlias alias="Artist" type="com.spring.security.model.Artist" />
 		<typeAlias alias="Song" type="com.spring.security.model.Song" />
+		<typeAlias alias="Lyrics" type="com.spring.security.model.Lyrics"/>
 		<typeAlias alias="Genre" type="com.spring.security.model.Genre" />
 		<typeAlias alias="Album" type="com.spring.security.model.Album" />
 		<typeAlias alias="Account" type="com.spring.security.model.Account" />
@@ -17,6 +18,8 @@
 		<typeAlias alias="ListGenreId" type="com.spring.security.request.ListGenreId" />
 		<typeAlias alias="ListArtistId" type="com.spring.security.request.ListArtistId" />
 		<typeAlias alias="ListAlbumId" type="com.spring.security.request.ListAlbumId" />
+		<typeAlias alias="ListLyrics" type="com.spring.security.request.ListLyrics" />
+
 	</typeAliases>
 
 	<mappers>

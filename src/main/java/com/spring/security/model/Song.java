@@ -16,7 +16,7 @@ public class Song {
     private Date releaseYear;
     private String audio;
     private String lyrics;
-    private String duration;
+    private Integer duration;
     private Boolean status;
     private Integer accountId;
 }

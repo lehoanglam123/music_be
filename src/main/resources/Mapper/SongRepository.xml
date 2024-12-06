@@ -38,6 +38,14 @@
             #{duration});
     </insert>
 
+    <insert id="insertLyricsBatch" parameterType="com.spring.security.request.ListLyrics">
+        INSERT INTO lyrics (timestamp, lyric)
+        VALUES
+        <foreach collection="lyricsList" item="item" separator=",">
+            (#{item.timestamp}, #{item.lyric})
+        </foreach>
+    </insert>
+
     <!-- GET SONG BY ID -->
     <select id="getListSongByUserId" resultType="com.spring.security.entity.SongSearchEntity"
             resultMap="search">

@@ -2,9 +2,11 @@ package com.spring.security.repository;
 
 import com.spring.security.entity.SongEntity;
 import com.spring.security.entity.SongSearchEntity;
+import com.spring.security.model.Lyrics;
 import com.spring.security.model.Song;
 import com.spring.security.request.ListSongId;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,13 +21,17 @@ public interface SongRepository {
 
     Optional<Song> getSongByName(String songName);
 
-    boolean updateSongById(Song song);
+    void updateSongById(Song song);
 
     List<Integer> getListSongByList(ListSongId listId);
 
-    boolean deleteSongByListId(ListSongId listId);
+    void deleteSongByListId(ListSongId listId);
 
     List<SongSearchEntity> getListSongByUserId(int id);
 
     List<SongSearchEntity> searchSongByName(String songName);
+
+    boolean insertLyrics(Lyrics lyricsEntry);
+
+    void insertLyricsBatch(@Param("lyricsList") List<Lyrics> lyricsList);
 }
