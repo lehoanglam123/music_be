@@ -17,7 +17,7 @@
         WHERE 1=1;
     </select>
 
-    <insert id="insertSong" parameterType="com.spring.security.entity.SongEntity">
+    <insert id="insertSong" useGeneratedKeys="true" keyProperty="id" parameterType="com.spring.security.entity.SongEntity" >
         INSERT INTO `music`.`songs`
             (`song_name`,
             `genre_id`,
@@ -39,10 +39,10 @@
     </insert>
 
     <insert id="insertLyricsBatch" parameterType="com.spring.security.request.ListLyrics">
-        INSERT INTO lyrics (timestamp, lyric)
+        INSERT INTO lyrics (song_id,timestamp, lyric)
         VALUES
         <foreach collection="lyricsList" item="item" separator=",">
-            (#{item.timestamp}, #{item.lyric})
+            (#{songId} ,#{item.timestamp}, #{item.lyric})
         </foreach>
     </insert>
 

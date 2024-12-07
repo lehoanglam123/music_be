@@ -13,14 +13,17 @@ import com.spring.security.response.song.DeleteSongResponse;
 import com.spring.security.response.song.ListSongResponse;
 import com.spring.security.response.song.UpdateSongResponse;
 import com.spring.security.service.ServiceSong;
+import java.nio.file.Files;
+
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jmx.export.notification.ModelMBeanNotificationPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.swing.text.html.Option;
 import java.io.*;
 import java.util.*;
 import java.util.zip.ZipEntry;
@@ -69,17 +72,20 @@ class ServiceSongImpl implements ServiceSong {
             if(isZipFileByMagicNumber(zipFile)) {
                 List<File> files = unzipFile(zipFile);
                 SongEntity song = readMp3File(files);
-                var publicId = uploadUrl.concat(song.getSongName());
-                Map<String, Object> uploadConfig = new HashMap<>();
-                uploadConfig.put("resource_type", "auto");
-                uploadConfig.put("public_id", publicId);
-                uploadConfig.put("eager_async", true);
-                if (entity.getSongName() != null) {
-                    Map<?, ?> cloudinaryResponse = this.cloudinary.uploader()
-                            .upload(zipFile.getBytes(),uploadConfig);
-                    String url = (String) cloudinaryResponse.get("secure_url");
-                    entity.setAudio(url);
-                    songRepository.insertSong(entity);
+                List<Lyrics> listLyrics = new ArrayList<>();
+                Map<String, String> lyrics = readLrcFile(files);
+                lyrics.forEach((key, value)->listLyrics.add(new Lyrics(key, value)));
+                Optional<File> mp3FileOptional = files.stream()
+                        .filter(file -> file.getName().endsWith(".mp3")) // Select file Mp3 only
+                        .findFirst(); // get first file Mp3
+
+                if (mp3FileOptional.isPresent()) {
+                    File mp3File = mp3FileOptional.get();
+                    byte[] mp3Bytes = Files.readAllBytes(mp3File.toPath());
+                    String url = uploadMp3ToCloudinary(song.getSongName(), mp3Bytes);
+                    song.setAudio(url);
+                    songRepository.insertSong(song);
+                    songRepository.insertLyricsBatch(song.getId(),listLyrics);
                     CreateSongResponse response = CreateSongResponse.builder()
                             .status("200")
                             .message("Creating successful song!")
@@ -87,11 +93,17 @@ class ServiceSongImpl implements ServiceSong {
                             .build();
                     return new ResponseEntity<>(response, HttpStatus.OK);
                 }
-                Map<String, String> lyrics = readLrcFile(files);
-                List<Lyrics> lyricsList = new ArrayList<>();
-                lyrics.forEach((key, value) -> lyricsList.add(new Lyrics(key, value)));
-                songRepository.insertLyricsBatch(lyricsList);
+                CreateSongResponse response = CreateSongResponse.builder()
+                        .status("400")
+                        .message("Mp3 file not found!")
+                        .build();
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
             }
+            CreateSongResponse response = CreateSongResponse.builder()
+                    .status("400")
+                    .message("Zip file not found!")
+                    .build();
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         CreateSongResponse response = CreateSongResponse.builder()
                 .status("400")
@@ -200,6 +212,7 @@ class ServiceSongImpl implements ServiceSong {
         }
     }
 
+
     private boolean isZipFileByMagicNumber(MultipartFile multipartFile) throws IOException {
         try(InputStream inputStream = multipartFile.getInputStream()){
             byte[] signature = new byte[4];
@@ -217,9 +230,11 @@ class ServiceSongImpl implements ServiceSong {
         if(!destinationDir.exists()) {
             final var mkdir = destinationDir.mkdirs();
         }
+
         try (InputStream fis = zipFile.getInputStream()){
             ZipInputStream zis = new ZipInputStream(fis);
             ZipEntry entry;
+
             while ((entry = zis.getNextEntry()) != null){
                 String fileName = entry.getName();
                 if(fileName.endsWith(".mp3") || fileName.endsWith(".lrc")){
@@ -240,6 +255,26 @@ class ServiceSongImpl implements ServiceSong {
         return extractedFiles;
     }
 
+    private Optional<File[]> safeListFiles(File file){
+        return Optional.ofNullable(file.listFiles());
+    }
+
+    private List<File> findFilesExtension(List<File> files, String... extensions)throws  {
+        List<File> result = new ArrayList<>();
+
+        for(File file: files) {
+            if (file.isDirectory()) {
+                List<File> foundFiles = findFilesExtension(List.of(file.listFiles()), extensions);
+                result.addAll(foundFiles);
+            }
+            List<File> foundFiles = safeListFiles(file)
+                    .map(subFiles -> findFilesExtension(List.of(subFiles), extensions))
+                    .orElseThrow(() -> new IllegalStateException("Cannot process directory: " + file.getPath()));
+            result.addAll(foundFiles);
+        }
+        return null;
+    }
+
     private SongEntity readMp3File(List<File> files) throws Exception {
         SongEntity song = SongEntity.builder().build();
         for(File file: files) {
@@ -258,6 +293,7 @@ class ServiceSongImpl implements ServiceSong {
         return song;
     }
 
+    @NotNull
     private Map<String, String> readLrcFile(List<File> files) {
         Map<String, String> lyrics = new LinkedHashMap<>();
         for (File file : files) {
@@ -278,5 +314,21 @@ class ServiceSongImpl implements ServiceSong {
             }
         }
         return lyrics;
+    }
+    private String uploadMp3ToCloudinary(String publicId, byte[] mp3Bytes)throws IOException {
+        String url = "";
+        try {
+            Map<String, Object> uploadConfig = new HashMap<>();
+            uploadConfig.put("resource_type", "auto");
+            uploadConfig.put("public_id", publicId);
+            uploadConfig.put("eager_async", true);
+            Map<?, ?> cloudinaryResponse = this.cloudinary.uploader()
+                    .upload(mp3Bytes,uploadConfig);
+            url = (String) cloudinaryResponse.get("secure_url");
+            return url;
+        }catch (IOException e) {
+            System.err.print("error:" + e);
+        }
+        return url;
     }
 }

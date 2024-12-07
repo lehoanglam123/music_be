@@ -15,7 +15,7 @@ import java.util.Optional;
 public interface SongRepository {
     List<SongSearchEntity> getAll();
 
-    boolean insertSong(SongEntity entity);
+    Integer insertSong(SongEntity entity);
 
     Optional<Song> getSongById(int id);
 
@@ -31,7 +31,5 @@ public interface SongRepository {
 
     List<SongSearchEntity> searchSongByName(String songName);
 
-    boolean insertLyrics(Lyrics lyricsEntry);
-
-    void insertLyricsBatch(@Param("lyricsList") List<Lyrics> lyricsList);
+    void insertLyricsBatch(@Param("songId")Integer songId, @Param("lyricsList") List<Lyrics> listLyrics);
 }
