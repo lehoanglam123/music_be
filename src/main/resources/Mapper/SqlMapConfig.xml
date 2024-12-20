@@ -11,7 +11,7 @@
 		<typeAlias alias="Account" type="com.spring.security.model.Account" />
 		<typeAlias alias="Token" type="com.spring.security.model.Token" />
 		<typeAlias alias="SongEntity" type="com.spring.security.entity.SongEntity" />
-		<typeAlias alias="SongSearchEntity" type="com.spring.security.entity.SongSearchEntity" />
+		<typeAlias alias="SongSearch" type="com.spring.security.entity.SongSearchEntity" />
 		<typeAlias alias="ArtistEntity" type="com.spring.security.entity.ArtistEntity" />
 		<typeAlias alias="AlbumEntity" type="com.spring.security.entity.AlbumEntity" />
 		<typeAlias alias="ListSongId" type="com.spring.security.request.ListSongId" />
@@ -19,7 +19,6 @@
 		<typeAlias alias="ListArtistId" type="com.spring.security.request.ListArtistId" />
 		<typeAlias alias="ListAlbumId" type="com.spring.security.request.ListAlbumId" />
 		<typeAlias alias="ListLyrics" type="com.spring.security.request.ListLyrics" />
-
 	</typeAliases>
 
 	<mappers>

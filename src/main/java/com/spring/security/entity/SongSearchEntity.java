@@ -1,10 +1,11 @@
 package com.spring.security.entity;
 
+import com.spring.security.model.Lyrics;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.Date;
+import java.util.List;
 
 @Data
 @Builder
@@ -12,14 +13,10 @@ import java.util.Date;
 public class SongSearchEntity {
     private Integer id;
     private String songName;
-    private String genreName;
     private String artistName;
-    private Integer albumId;
-    private Date releaseYear;
+    private Integer duration;
     private String audio;
-    private String lyrics;
-    private String duration;
-    private Integer accountId;
+    private List<Lyrics> lyrics;
 
     public SongSearchEntity() {
 

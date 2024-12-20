@@ -16,6 +16,7 @@ import com.spring.security.service.ServiceSong;
 import java.nio.file.Files;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -70,15 +71,15 @@ class ServiceSongImpl implements ServiceSong {
     public ResponseEntity<CreateSongResponse> uploadSong(MultipartFile zipFile, SongEntity entity) throws Exception {
         if(!zipFile.isEmpty()){
             if(isZipFileByMagicNumber(zipFile)) {
-                List<File> files = unzipFile(zipFile);
-                SongEntity song = readMp3File(files);
+                List<File> extractedFiles  = unzipFile(zipFile);
+                //List<File> targetFiles = findFilesExtension(extractedFiles, ".mp3", ".lrc");
+                SongEntity song = readMp3File(extractedFiles);
                 List<Lyrics> listLyrics = new ArrayList<>();
-                Map<String, String> lyrics = readLrcFile(files);
+                Map<String, String> lyrics = readLrcFile(extractedFiles);
                 lyrics.forEach((key, value)->listLyrics.add(new Lyrics(key, value)));
-                Optional<File> mp3FileOptional = files.stream()
+                Optional<File> mp3FileOptional = extractedFiles.stream()
                         .filter(file -> file.getName().endsWith(".mp3")) // Select file Mp3 only
                         .findFirst(); // get first file Mp3
-
                 if (mp3FileOptional.isPresent()) {
                     File mp3File = mp3FileOptional.get();
                     byte[] mp3Bytes = Files.readAllBytes(mp3File.toPath());
@@ -197,22 +198,6 @@ class ServiceSongImpl implements ServiceSong {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-
-    private File convertMultiToFile(MultipartFile multipartFile) throws IOException {
-        try {
-            File convFile = new File(Objects.requireNonNull(multipartFile.getOriginalFilename()));
-            boolean newFile = convFile.createNewFile();
-            FileOutputStream fos = new FileOutputStream(convFile);
-            fos.write(multipartFile.getBytes());
-            fos.close();
-            return convFile;
-        } catch (IOException e) {
-            System.err.print(e);
-            return null;
-        }
-    }
-
-
     private boolean isZipFileByMagicNumber(MultipartFile multipartFile) throws IOException {
         try(InputStream inputStream = multipartFile.getInputStream()){
             byte[] signature = new byte[4];
@@ -255,25 +240,27 @@ class ServiceSongImpl implements ServiceSong {
         return extractedFiles;
     }
 
-    private Optional<File[]> safeListFiles(File file){
-        return Optional.ofNullable(file.listFiles());
-    }
 
-    private List<File> findFilesExtension(List<File> files, String... extensions)throws  {
-        List<File> result = new ArrayList<>();
+//    private List<File> findFilesExtension(List<File> files, String... extensions) {
+//        List<File> result = new ArrayList<>();
+//
+//        for(File file: files) {
+//            try {
+//                if (file.isDirectory()) {
+//                    File[] subFiles = file.listFiles();
+//                    if (subFiles == null) {
+//                        throw new IOException("Cannot access files in directory: " + file.getPath());
+//                    }
+//                    List<File> foundFiles = findFilesExtension(List.of(subFiles), extensions);
+//                    assert foundFiles != null;
+//                    final var res = result.addAll(foundFiles);
+//                }
+//            } catch (Exception e) {
+//                System.err.println("Error processing file or directory: " + e.getMessage());
+//            }
+//        }
+//        return result;
 
-        for(File file: files) {
-            if (file.isDirectory()) {
-                List<File> foundFiles = findFilesExtension(List.of(file.listFiles()), extensions);
-                result.addAll(foundFiles);
-            }
-            List<File> foundFiles = safeListFiles(file)
-                    .map(subFiles -> findFilesExtension(List.of(subFiles), extensions))
-                    .orElseThrow(() -> new IllegalStateException("Cannot process directory: " + file.getPath()));
-            result.addAll(foundFiles);
-        }
-        return null;
-    }
 
     private SongEntity readMp3File(List<File> files) throws Exception {
         SongEntity song = SongEntity.builder().build();
@@ -316,7 +303,7 @@ class ServiceSongImpl implements ServiceSong {
         return lyrics;
     }
     private String uploadMp3ToCloudinary(String publicId, byte[] mp3Bytes)throws IOException {
-        String url = "";
+        String url = null;
         try {
             Map<String, Object> uploadConfig = new HashMap<>();
             uploadConfig.put("resource_type", "auto");
@@ -331,4 +318,5 @@ class ServiceSongImpl implements ServiceSong {
         }
         return url;
     }
+
 }

@@ -70,29 +70,30 @@
     </select>
 
     <!-- SEARCH SONG BY NAME -->
-    <select id="searchSongByName" resultType="com.spring.security.entity.SongSearchEntity"
-            resultMap="search">
+
+    <select id="searchSongByName" resultMap="songResultMap">
         SELECT
-            s.song_id,
-            s.song_name,
-            s.release_year,
-            s.duration,
-            s.status,
+            s.song_id AS songId,
+            s.song_name AS songName,
+            s.duration AS duration,
             s.audio,
-            s.lyrics,
-            a.artist_name,
-            g.genre_name
+            l.timestamp AS timestamp,
+            l.lyric AS lyric
         FROM
             songs s
-        LEFT JOIN
-            artists a ON s.artist_id = a.artist_id
-        LEFT JOIN
-            genres g ON s.genre_id = g.genre_id
+            LEFT JOIN
+            lyrics l ON s.song_id = l.song_id
         WHERE
-            s.`song_name` LIKE CONCAT('%', #{songName, jdbcType=VARCHAR}, '%') ESCAPE '!'
-            OR a.artist_name LIKE CONCAT('%', #{songName, jdbcType=VARCHAR}, '%') ESCAPE '!'
-            LIMIT 5;
+            s.song_name LIKE CONCAT('%', #{songName, jdbcType=VARCHAR}, '%')
+            OR EXISTS (
+                SELECT 1
+                FROM artists a
+                WHERE a.artist_id = s.artist_id
+                AND a.artist_name LIKE CONCAT('%', #{songName, jdbcType=VARCHAR}, '%')
+                )
+        ORDER BY s.song_id
     </select>
+
     <!--********************-->
 
     <!--************** -->
@@ -191,17 +192,31 @@
         <result property="accountId" column="account_id"/>
     </resultMap>
 
-    <resultMap id="search" type="SongSearchEntity">
+    <resultMap id="search" type="Song">
         <result property="id" column="song_id"/>
         <result property="songName" column="song_name"/>
-        <result property="artistName" column="artist_name"/>
+        <result property="genreId" column="genre_id"/>
+        <result property="artistId" column="artist_id"/>
         <result property="albumId" column="album_id"/>
-        <result property="genreName" column="genre_name"/>
         <result property="releaseYear" column="release_year"/>
         <result property="audio" column="audio"/>
         <result property="lyrics" column="lyrics"/>
         <result property="duration" column="duration"/>
-        <result property="accountId" column="account_id" />
+        <result property="status" column="status"/>
+        <result property="accountId" column="account_id"/>
     </resultMap>
+
+    <resultMap id="songResultMap" type="com.spring.security.entity.SongSearchEntity">
+        <id property="id" column="songId" />
+        <result property="songName" column="songName" />
+        <result property="duration" column="duration" />
+        <result property="audio" column="audio" />
+        <collection property="lyrics" ofType="com.spring.security.model.Lyrics">
+            <result property="timestamp" column="timestamp" />
+            <result property="lyric" column="lyric" />
+        </collection>
+    </resultMap>
+
+
 
 </mapper>
